@@ -274,8 +274,19 @@ Possíveis evoluções do projeto:
 05_model_evaluation
 ```
 
-4. Acesse o dashboard para visualizar os resultados
+4. Dashboard para visualizar os resultados
 
+<p align="center">
+  <a href="https://youtu.be/NWRXEvl-rLQ">
+    <img src="dashboard/dash.gif" width="800">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/NWRXEvl-rLQ">
+    <img src="https://img.shields.io/badge/Assistir%20no%20YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white">
+  </a>
+</p>
 ---
 
 ## Conclusão
