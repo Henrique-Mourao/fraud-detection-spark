@@ -183,9 +183,9 @@
             }
           },
           "position": {
-            "x": 5,
+            "x": 0,
             "y": 0,
-            "width": 2,
+            "width": 12,
             "height": 1
           }
         },
@@ -235,9 +235,9 @@
             }
           },
           "position": {
-            "x": 10,
+            "x": 9,
             "y": 1,
-            "width": 2,
+            "width": 3,
             "height": 1
           }
         },
@@ -255,16 +255,24 @@
                       "expression": "`predicao`"
                     },
                     {
+                      "name": "real",
+                      "expression": "`real`"
+                    },
+                    {
                       "name": "quantidade",
                       "expression": "`quantidade`"
                     }
                   ],
                   "cubeGroupingSets": {
                     "sets": [
-                      {},
                       {
                         "fieldNames": [
                           "predicao"
+                        ]
+                      },
+                      {
+                        "fieldNames": [
+                          "real"
                         ]
                       }
                     ]
@@ -274,6 +282,10 @@
                     {
                       "direction": "ASC",
                       "expression": "`predicao`"
+                    },
+                    {
+                      "direction": "ASC",
+                      "expression": "`real`"
                     }
                   ]
                 }
@@ -281,21 +293,26 @@
             ],
             "spec": {
               "version": 3,
-              "frame": {
-                "showTitle": true,
-                "title": "Taxa Fraudes",
-                "headerAlignment": "left"
-              },
               "style": {
                 "fontColor": {
                   "light": "#000000"
                 }
               },
+              "frame": {
+                "showTitle": true,
+                "title": "Taxa Fraudes",
+                "headerAlignment": "center"
+              },
               "widgetType": "pivot",
               "encodings": {
+                "rows": [
+                  {
+                    "fieldName": "predicao"
+                  }
+                ],
                 "columns": [
                   {
-                    "fieldName": "predicao",
+                    "fieldName": "real",
                     "scale": {
                       "type": "categorical",
                       "sort": {
@@ -389,15 +406,15 @@
             }
           },
           "position": {
-            "x": 10,
+            "x": 9,
             "y": 3,
-            "width": 2,
+            "width": 3,
             "height": 1
           }
         },
         {
           "widget": {
-            "name": "d3a46054",
+            "name": "fraudes-por-categoria",
             "queries": [
               {
                 "name": "main_query",
@@ -430,6 +447,11 @@
                   }
                 }
               ],
+              "frame": {
+                "showTitle": true,
+                "title": "Fraudes por Categoria",
+                "headerAlignment": "center"
+              },
               "mark": {
                 "colors": [
                   "#007CA1",
@@ -559,15 +581,15 @@
             }
           },
           "position": {
-            "x": 10,
+            "x": 9,
             "y": 2,
-            "width": 2,
+            "width": 3,
             "height": 1
           }
         },
         {
           "widget": {
-            "name": "058d124c",
+            "name": "distribuicao-valores",
             "queries": [
               {
                 "name": "main_query",
@@ -589,6 +611,11 @@
             ],
             "spec": {
               "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Distribuição de Valores",
+                "headerAlignment": "center"
+              },
               "widgetType": "histogram",
               "encodings": {
                 "x": {
@@ -731,7 +758,7 @@
         },
         {
           "widget": {
-            "name": "e9543600",
+            "name": "performance-do-modelo",
             "queries": [
               {
                 "name": "main_query",
@@ -757,6 +784,11 @@
             ],
             "spec": {
               "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Performance do Modelo",
+                "headerAlignment": "center"
+              },
               "widgetType": "table",
               "encodings": {
                 "columns": [
@@ -1016,7 +1048,7 @@
         },
         {
           "widget": {
-            "name": "183cf45e",
+            "name": "evolucao-temporal",
             "queries": [
               {
                 "name": "main_query",
@@ -1097,6 +1129,11 @@
                   }
                 }
               ],
+              "frame": {
+                "showTitle": true,
+                "title": "Evolução Temporal",
+                "headerAlignment": "center"
+              },
               "widgetType": "combo",
               "encodings": {
                 "x": {
@@ -1141,7 +1178,7 @@
         },
         {
           "widget": {
-            "name": "4204cd8c",
+            "name": "total-velocidade-ultimas-24h",
             "queries": [
               {
                 "name": "main_query",
@@ -1163,6 +1200,11 @@
             ],
             "spec": {
               "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "                      Total de velocidade nas últimas 24h",
+                "headerAlignment": "center"
+              },
               "widgetType": "pie",
               "encodings": {
                 "angle": {
@@ -1171,7 +1213,8 @@
                     "type": "quantitative"
                   },
                   "axis": {
-                    "title": "Total de velocidade nas últimas 24h"
+                    "title": "Total de velocidade nas últimas 24h",
+                    "hideTitle": true
                   }
                 },
                 "color": {
@@ -1199,7 +1242,7 @@
           "position": {
             "x": 6,
             "y": 1,
-            "width": 4,
+            "width": 3,
             "height": 3
           }
         }
