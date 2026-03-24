@@ -1,0 +1,1278 @@
+{
+  "datasets": [
+    {
+      "name": "b96f1ce7",
+      "displayName": "fraud_features",
+      "queryLines": [
+        "SELECT * FROM workspace.default.fraud_features"
+      ]
+    },
+    {
+      "name": "fdcb5097",
+      "displayName": "1. Métricas principais",
+      "queryLines": [
+        "SELECT \r\n",
+        "    COUNT(*) as total_transacoes,\r\n",
+        "    SUM(CASE WHEN is_fraud = 1 THEN 1 ELSE 0 END) as fraudes_reais,\r\n",
+        "    SUM(CASE WHEN prediction = 1 THEN 1 ELSE 0 END) as fraudes_detectadas,\r\n",
+        "    ROUND(AVG(CASE WHEN is_fraud = 1 THEN 1 ELSE 0 END) * 100, 2) as taxa_fraude_real,\r\n",
+        "    ROUND(SUM(CASE WHEN is_fraud = 1 AND prediction = 1 THEN 1 ELSE 0 END) * 100.0 / NULLIF(SUM(is_fraud), 0), 2) as taxa_deteccao\r\n",
+        "FROM fraud_predictions_final"
+      ]
+    },
+    {
+      "name": "7d86f86a",
+      "displayName": "2. Matriz de Confusão",
+      "queryLines": [
+        "SELECT \r\n",
+        "    CASE WHEN is_fraud = 0 THEN 'Legítima' ELSE 'Fraude' END as real,\r\n",
+        "    CASE WHEN prediction = 0 THEN 'Legítima' ELSE 'Fraude' END as predicao,\r\n",
+        "    COUNT(*) as quantidade\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "GROUP BY is_fraud, prediction\r\n",
+        "ORDER BY is_fraud DESC, prediction DESC"
+      ]
+    },
+    {
+      "name": "62306d26",
+      "displayName": "3. Fraudes por Categoria",
+      "queryLines": [
+        "SELECT \r\n",
+        "    merchant_category,\r\n",
+        "    COUNT(*) as total_transacoes,\r\n",
+        "    SUM(is_fraud) as fraudes,\r\n",
+        "    ROUND(AVG(is_fraud) * 100, 2) as taxa_fraude\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "GROUP BY merchant_category\r\n",
+        "ORDER BY taxa_fraude DESC"
+      ]
+    },
+    {
+      "name": "206ed38e",
+      "displayName": "4. Fraudes por Hora do Dia",
+      "queryLines": [
+        "SELECT \r\n",
+        "    transaction_hour as hora,\r\n",
+        "    COUNT(*) as transacoes,\r\n",
+        "    SUM(is_fraud) as fraudes,\r\n",
+        "    ROUND(AVG(is_fraud) * 100, 2) as taxa_fraude\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "GROUP BY transaction_hour\r\n",
+        "ORDER BY transaction_hour"
+      ]
+    },
+    {
+      "name": "9cc69593",
+      "displayName": "5. Distribuição de Valores",
+      "queryLines": [
+        "SELECT \r\n",
+        "    CASE \r\n",
+        "        WHEN amount < 100 THEN '0-100'\r\n",
+        "        WHEN amount < 500 THEN '100-500'\r\n",
+        "        WHEN amount < 1000 THEN '500-1000'\r\n",
+        "        ELSE '1000+'\r\n",
+        "    END as faixa_valor,\r\n",
+        "    COUNT(*) as transacoes,\r\n",
+        "    SUM(is_fraud) as fraudes\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "GROUP BY \r\n",
+        "    CASE \r\n",
+        "        WHEN amount < 100 THEN '0-100'\r\n",
+        "        WHEN amount < 500 THEN '100-500'\r\n",
+        "        WHEN amount < 1000 THEN '500-1000'\r\n",
+        "        ELSE '1000+'\r\n",
+        "    END\r\n",
+        "ORDER BY faixa_valor"
+      ]
+    },
+    {
+      "name": "e20282da",
+      "displayName": "6. Transações Estrangeiras",
+      "queryLines": [
+        "SELECT \r\n",
+        "    CASE WHEN foreign_transaction = 1 THEN 'Internacional' ELSE 'Nacional' END as tipo,\r\n",
+        "    COUNT(*) as quantidade,\r\n",
+        "    SUM(is_fraud) as fraudes,\r\n",
+        "    ROUND(AVG(is_fraud) * 100, 2) as taxa_fraude\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "GROUP BY foreign_transaction"
+      ]
+    },
+    {
+      "name": "ff8878b5",
+      "displayName": "7. Performance do Modelo",
+      "queryLines": [
+        "SELECT \r\n",
+        "    'True Positives' as metrica,\r\n",
+        "    SUM(CASE WHEN is_fraud = 1 AND prediction = 1 THEN 1 ELSE 0 END) as valor\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "UNION ALL\r\n",
+        "SELECT 'True Negatives', SUM(CASE WHEN is_fraud = 0 AND prediction = 0 THEN 1 ELSE 0 END)\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "UNION ALL\r\n",
+        "SELECT 'False Positives', SUM(CASE WHEN is_fraud = 0 AND prediction = 1 THEN 1 ELSE 0 END)\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "UNION ALL\r\n",
+        "SELECT 'False Negatives', SUM(CASE WHEN is_fraud = 1 AND prediction = 0 THEN 1 ELSE 0 END)\r\n",
+        "FROM fraud_predictions_final"
+      ]
+    },
+    {
+      "name": "e3b5a196",
+      "displayName": "8. Score de Confiança do Dispositivo",
+      "queryLines": [
+        "SELECT \r\n",
+        "    CASE WHEN is_fraud = 1 THEN 'Fraude' ELSE 'Legítima' END as tipo,\r\n",
+        "    device_trust_score\r\n",
+        "FROM fraud_predictions_final"
+      ]
+    },
+    {
+      "name": "9584bb8a",
+      "displayName": "9. Top 10 Transações Suspeitas",
+      "queryLines": [
+        "SELECT \r\n",
+        "    transaction_id,\r\n",
+        "    amount,\r\n",
+        "    merchant_category,\r\n",
+        "    foreign_transaction,\r\n",
+        "    device_trust_score,\r\n",
+        "    is_fraud,\r\n",
+        "    prediction,\r\n",
+        "    probability\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "WHERE prediction = 1\r\n",
+        "ORDER BY amount DESC\r\n",
+        "LIMIT 10"
+      ]
+    },
+    {
+      "name": "12f60376",
+      "displayName": "10. Evolução Temporal",
+      "queryLines": [
+        "SELECT \r\n",
+        "    transaction_hour,\r\n",
+        "    COUNT(*) as transacoes,\r\n",
+        "    SUM(prediction) as alertas_fraude\r\n",
+        "FROM fraud_predictions_final\r\n",
+        "GROUP BY transaction_hour\r\n",
+        "ORDER BY transaction_hour"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "afe6521c",
+      "displayName": "Frauds Control",
+      "layout": [
+        {
+          "widget": {
+            "name": "4ebf7564",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## <span style=\"text-align:center;display:block\"><span style=\"font-size: 30px;\">**Fraudes**</span></span>"
+              ]
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "dark": "#000000"
+              },
+              "widgetBorderColor": {
+                "light": "#FFFFFF"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "total-transacoes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fdcb5097",
+                  "fields": [
+                    {
+                      "name": "sum(total_transacoes)",
+                      "expression": "SUM(`total_transacoes`)"
+                    },
+                    {
+                      "name": "sum(fraudes_detectadas)",
+                      "expression": "SUM(`fraudes_detectadas`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Fraudes",
+                "headerAlignment": "left"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(fraudes_detectadas)"
+                },
+                "target": {
+                  "fieldName": "sum(total_transacoes)"
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 1,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "taxa-fraudes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7d86f86a",
+                  "fields": [
+                    {
+                      "name": "predicao",
+                      "expression": "`predicao`"
+                    },
+                    {
+                      "name": "quantidade",
+                      "expression": "`quantidade`"
+                    }
+                  ],
+                  "cubeGroupingSets": {
+                    "sets": [
+                      {},
+                      {
+                        "fieldNames": [
+                          "predicao"
+                        ]
+                      }
+                    ]
+                  },
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`predicao`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Taxa Fraudes",
+                "headerAlignment": "left"
+              },
+              "style": {
+                "fontColor": {
+                  "light": "#000000"
+                }
+              },
+              "widgetType": "pivot",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "predicao",
+                    "scale": {
+                      "type": "categorical",
+                      "sort": {
+                        "by": "natural-order-reversed"
+                      }
+                    },
+                    "displayName": "Predicao"
+                  }
+                ],
+                "cell": {
+                  "type": "multi-cell",
+                  "fields": [
+                    {
+                      "fieldName": "quantidade",
+                      "cellType": "text",
+                      "contentAlignment": "right",
+                      "displayName": "Quantidade",
+                      "style": {
+                        "type": "color-scale",
+                        "backgroundColor": {
+                          "scale": {
+                            "type": "quantitative",
+                            "colorRamp": {
+                              "mode": "scheme",
+                              "scheme": "greenblue"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 1,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "taxa-real",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7d86f86a",
+                  "fields": [
+                    {
+                      "name": "countdistinct(predicao)",
+                      "expression": "COUNT(DISTINCT `predicao`)"
+                    },
+                    {
+                      "name": "sum(quantidade)",
+                      "expression": "SUM(`quantidade`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "headerAlignment": "left",
+                "title": "Taxa Real"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(quantidade)"
+                },
+                "target": {
+                  "fieldName": "countdistinct(predicao)"
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 3,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "d3a46054",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "62306d26",
+                  "fields": [
+                    {
+                      "name": "sum(total_transacoes)",
+                      "expression": "SUM(`total_transacoes`)"
+                    },
+                    {
+                      "name": "merchant_category",
+                      "expression": "`merchant_category`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "annotations": [
+                {
+                  "type": "vertical-line",
+                  "encodings": {
+                    "x": {
+                      "dataValue": "400",
+                      "dataType": "INTEGER"
+                    }
+                  }
+                }
+              ],
+              "mark": {
+                "colors": [
+                  "#007CA1",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(total_transacoes)",
+                  "axis": {
+                    "hideGrid": true,
+                    "hideLabels": true,
+                    "hideTitle": true,
+                    "title": "Total Trasactions"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "merchant_category",
+                  "axis": {
+                    "hideLabels": false,
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "taxa-fraude1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "206ed38e",
+                  "fields": [
+                    {
+                      "name": "sum(taxa_fraude)",
+                      "expression": "SUM(`taxa_fraude`)"
+                    },
+                    {
+                      "name": "sum(transacoes)",
+                      "expression": "SUM(`transacoes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Taxa Fraude",
+                "headerAlignment": "left"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(transacoes)"
+                },
+                "target": {
+                  "fieldName": "sum(taxa_fraude)"
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 2,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "058d124c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9cc69593",
+                  "fields": [
+                    {
+                      "name": "faixa_valor",
+                      "expression": "`faixa_valor`"
+                    },
+                    {
+                      "name": "sum(fraudes)",
+                      "expression": "SUM(`fraudes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "faixa_valor",
+                  "axis": {
+                    "hideLabels": false,
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(fraudes)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "cfd25159",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e20282da",
+                  "fields": [
+                    {
+                      "name": "quantidade",
+                      "expression": "`quantidade`"
+                    },
+                    {
+                      "name": "tipo",
+                      "expression": "`tipo`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "facet": {
+                "type": "wrap",
+                "fieldName": "tipo",
+                "header": {
+                  "hideTitle": true
+                },
+                "scale": {
+                  "type": "categorical"
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 1
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "color": {
+                  "fieldName": "quantidade",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "e9543600",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ff8878b5",
+                  "fields": [
+                    {
+                      "name": "metrica",
+                      "expression": "`metrica`"
+                    },
+                    {
+                      "name": "valor",
+                      "expression": "`valor`"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "metrica"
+                  },
+                  {
+                    "fieldName": "valor"
+                  },
+                  {
+                    "fieldName": "count(*)"
+                  }
+                ]
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "1d33ce39",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e3b5a196",
+                  "fields": [
+                    {
+                      "name": "tipo",
+                      "expression": "`tipo`"
+                    },
+                    {
+                      "name": "min(device_trust_score)",
+                      "expression": "MIN(`device_trust_score`)"
+                    },
+                    {
+                      "name": "q1(device_trust_score)",
+                      "expression": "PERCENTILE(`device_trust_score`, 0.25)"
+                    },
+                    {
+                      "name": "median(device_trust_score)",
+                      "expression": "MEDIAN(`device_trust_score`)"
+                    },
+                    {
+                      "name": "q3(device_trust_score)",
+                      "expression": "PERCENTILE(`device_trust_score`, 0.75)"
+                    },
+                    {
+                      "name": "max(device_trust_score)",
+                      "expression": "MAX(`device_trust_score`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "box",
+              "encodings": {
+                "x": {
+                  "fieldName": "tipo",
+                  "axis": {
+                    "hideTitle": true,
+                    "hideLabels": false
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "whiskerStart": {
+                    "fieldName": "min(device_trust_score)"
+                  },
+                  "boxStart": {
+                    "fieldName": "q1(device_trust_score)"
+                  },
+                  "boxMid": {
+                    "fieldName": "median(device_trust_score)"
+                  },
+                  "boxEnd": {
+                    "fieldName": "q3(device_trust_score)"
+                  },
+                  "whiskerEnd": {
+                    "fieldName": "max(device_trust_score)"
+                  },
+                  "axis": {
+                    "hideTitle": true,
+                    "hideLabels": false,
+                    "hideGrid": false
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "fn": {
+                      "type": "symlog"
+                    }
+                  }
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "5d03cb4d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9584bb8a",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    },
+                    {
+                      "name": "sum(amount)",
+                      "expression": "SUM(`amount`)"
+                    },
+                    {
+                      "name": "sum(device_trust_score)",
+                      "expression": "SUM(`device_trust_score`)"
+                    },
+                    {
+                      "name": "sum(foreign_transaction)",
+                      "expression": "SUM(`foreign_transaction`)"
+                    },
+                    {
+                      "name": "sum(is_fraud)",
+                      "expression": "SUM(`is_fraud`)"
+                    },
+                    {
+                      "name": "sum(prediction)",
+                      "expression": "SUM(`prediction`)"
+                    },
+                    {
+                      "name": "sum(transaction_id)",
+                      "expression": "SUM(`transaction_id`)"
+                    },
+                    {
+                      "name": "merchant_category",
+                      "expression": "`merchant_category`"
+                    },
+                    {
+                      "name": "probability",
+                      "expression": "`probability`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "headerHeight": 30,
+              "freezeUpToColumnNumber": 3,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "count(*)",
+                    "contentAlignment": "center",
+                    "headerTooltip": "Count of Records",
+                    "useForSearch": false,
+                    "displayName": "Count",
+                    "style": {
+                      "type": "basic",
+                      "rules": [
+                        {
+                          "condition": {
+                            "operator": "is null"
+                          },
+                          "backgroundColor": "#00A972"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fieldName": "sum(amount)",
+                    "contentAlignment": "center",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      },
+                      "hideGroupSeparator": true
+                    },
+                    "displayName": "Sum of Amount"
+                  },
+                  {
+                    "fieldName": "sum(device_trust_score)",
+                    "contentAlignment": "center"
+                  },
+                  {
+                    "fieldName": "sum(foreign_transaction)",
+                    "contentAlignment": "left"
+                  },
+                  {
+                    "fieldName": "sum(is_fraud)",
+                    "contentAlignment": "left"
+                  },
+                  {
+                    "fieldName": "sum(prediction)",
+                    "contentAlignment": "left"
+                  },
+                  {
+                    "fieldName": "sum(transaction_id)",
+                    "contentAlignment": "left"
+                  },
+                  {
+                    "fieldName": "merchant_category"
+                  },
+                  {
+                    "fieldName": "probability",
+                    "style": {
+                      "type": "basic"
+                    }
+                  }
+                ]
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "183cf45e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "12f60376",
+                  "fields": [
+                    {
+                      "name": "transacoes",
+                      "expression": "`transacoes`"
+                    },
+                    {
+                      "name": "sum(alertas_fraude)",
+                      "expression": "SUM(`alertas_fraude`)"
+                    },
+                    {
+                      "name": "sum(transaction_hour)",
+                      "expression": "SUM(`transaction_hour`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 1
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "annotations": [
+                {
+                  "type": "horizontal-line",
+                  "encodings": {
+                    "y": {
+                      "dataValue": "74",
+                      "dataType": "DOUBLE"
+                    }
+                  }
+                }
+              ],
+              "widgetType": "combo",
+              "encodings": {
+                "x": {
+                  "fieldName": "transacoes",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "sum(alertas_fraude)"
+                      }
+                    ]
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "sum(transaction_hour)"
+                      }
+                    ]
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 21,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "4204cd8c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b96f1ce7",
+                  "fields": [
+                    {
+                      "name": "sum(velocity_last_24h)",
+                      "expression": "SUM(`velocity_last_24h`)"
+                    },
+                    {
+                      "name": "merchant_category",
+                      "expression": "`merchant_category`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(velocity_last_24h)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Total de velocidade nas últimas 24h"
+                  }
+                },
+                "color": {
+                  "fieldName": "merchant_category",
+                  "legend": {
+                    "hide": false,
+                    "hideTitle": true,
+                    "position": "left"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "angle-reversed"
+                    }
+                  }
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#000000"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 1,
+            "width": 4,
+            "height": 3
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "ad8dedda",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "35b44c87",
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": []
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#1F272D"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#000000"
+      },
+      "widgetBorderColor": {
+        "light": "#FFFFFF",
+        "dark": "#FFFFFF"
+      },
+      "fontColor": {
+        "light": "#11171C",
+        "dark": "#FFFFFF"
+      },
+      "selectionColor": {
+        "light": "#2272B4",
+        "dark": "#FFF8F8"
+      },
+      "visualizationColors": [
+        "#077A9D",
+        "#FFAB00",
+        "#00A972",
+        "#FF3621",
+        "#8BCAE7",
+        "#AB4057",
+        "#99DDB4",
+        "#FCA4A1",
+        "#919191",
+        "#BF7080"
+      ],
+      "widgetHeaderAlignment": "RIGHT"
+    },
+    "applyModeEnabled": false
+  }
+}
