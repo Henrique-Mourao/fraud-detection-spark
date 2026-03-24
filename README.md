@@ -100,30 +100,28 @@ Esse cenário representa um **dataset altamente desbalanceado**, algo comum em p
 
 O projeto segue uma arquitetura típica de **pipeline de dados e Machine Learning**.
 
-```
-Dataset de Transações
-        │
-        ▼
-Ingestão de Dados (Spark)
-        │
-        ▼
-Limpeza e Validação de Dados
-        │
-        ▼
-Análise Exploratória (EDA)
-        │
-        ▼
-Engenharia de Features
-        │
-        ▼
-Treinamento do Modelo
-        │
-        ▼
-Avaliação do Modelo
-        │
-        ▼
-Dashboard de Análise
-```
+<div align="center">
+
+### Pipeline de Machine Learning
+
+![Pipeline](https://img.shields.io/badge/1-Dataset-blue?style=for-the-badge) 
+→ 
+![Pipeline](https://img.shields.io/badge/2-Ingestão-orange?style=for-the-badge) 
+→ 
+![Pipeline](https://img.shields.io/badge/3-Limpeza-green?style=for-the-badge) 
+→ 
+![Pipeline](https://img.shields.io/badge/4-EDA-purple?style=for-the-badge)
+
+![Pipeline](https://img.shields.io/badge/5-Features-red?style=for-the-badge) 
+→ 
+![Pipeline](https://img.shields.io/badge/6-Treinamento-yellow?style=for-the-badge) 
+→ 
+![Pipeline](https://img.shields.io/badge/7-Avaliação-cyan?style=for-the-badge) 
+→ 
+![Pipeline](https://img.shields.io/badge/8-Dashboard-pink?style=for-the-badge)
+
+</div>
+
 
 O uso do **Apache Spark** permite processar dados de forma distribuída, possibilitando escalar o sistema para milhões de transações.
 
